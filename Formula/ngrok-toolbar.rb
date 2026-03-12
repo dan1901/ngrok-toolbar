@@ -11,12 +11,11 @@ class NgrokToolbar < Formula
 
   def install
     cd "NgrokTools" do
-      build_dir = buildpath/"NgrokTools/spm-build"
       system "swift", "build", "-c", "release", "--disable-sandbox",
-             "--scratch-path", build_dir
+             "--scratch-path", "spm-build"
 
       arch = Hardware::CPU.arm? ? "arm64" : "x86_64"
-      bin_path = build_dir/"#{arch}-apple-macosx/release"
+      bin_path = Pathname.new("spm-build/#{arch}-apple-macosx/release")
 
       bin.install bin_path/"NgrokTools" => "ngrok-toolbar"
 
