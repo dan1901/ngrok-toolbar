@@ -10,6 +10,8 @@
     <string>ngrok Tools</string>
     <key>CFBundleIdentifier</key>
     <string>com.letsur.ngrok-tools</string>
+    <key>CFBundleExecutable</key>
+    <string>NgrokTools</string>
     <key>CFBundleIconFile</key>
     <string>AppIcon</string>
     <key>CFBundleVersion</key>

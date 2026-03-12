@@ -7,6 +7,7 @@ struct SettingsView: View {
     @State private var currentToken: String = ""
     @State private var showTokenSaved = false
     @StateObject private var updateChecker = UpdateChecker()
+    @StateObject private var launchAtLogin = LaunchAtLoginService()
     @Environment(\.dismiss) private var dismiss
 
     private let keychain = KeychainService()
@@ -23,12 +24,14 @@ struct SettingsView: View {
             Divider()
             notificationSection
             Divider()
+            generalSection
+            Divider()
             aboutSection
 
             Spacer()
         }
         .padding(20)
-        .frame(width: 380, height: 520)
+        .frame(width: 380, height: 560)
         .onAppear {
             if let token = keychain.read() {
                 currentToken = String(token.prefix(8)) + "..."
@@ -107,6 +110,15 @@ struct SettingsView: View {
                 .font(.headline)
 
             Toggle("Enable system notifications", isOn: $notificationsEnabled)
+        }
+    }
+
+    private var generalSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Label("General", systemImage: "gear")
+                .font(.headline)
+
+            Toggle("시스템 시작 시 자동 실행", isOn: $launchAtLogin.isEnabled)
         }
     }
 
