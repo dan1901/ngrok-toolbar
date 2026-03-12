@@ -27,7 +27,7 @@ jobs:
           cp NgrokTools/.build/release/NgrokTools NgrokToolbar.app/Contents/MacOS/
           cp NgrokTools/Info.plist NgrokToolbar.app/Contents/
           if [ -d NgrokTools/.build/release/NgrokTools_NgrokTools.bundle ]; then
-            cp -R NgrokTools/.build/release/NgrokTools_NgrokTools.bundle NgrokToolbar.app/Contents/Resources/
+            cp -R NgrokTools/.build/release/NgrokTools_NgrokTools.bundle NgrokToolbar.app/
           fi
           if [ -f NgrokTools/AppIcon.icns ]; then
             cp NgrokTools/AppIcon.icns NgrokToolbar.app/Contents/Resources/

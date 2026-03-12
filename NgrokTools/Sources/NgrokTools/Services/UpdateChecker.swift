@@ -14,7 +14,7 @@ struct GitHubRelease: Codable {
 
 @MainActor
 final class UpdateChecker: ObservableObject {
-    static let currentVersion = "1.0.2"
+    static let currentVersion = "1.0.3"
     private static let repoURL = "https://api.github.com/repos/dan1901/ngrok-toolbar/releases/latest"
 
     @Published var latestVersion: String?
