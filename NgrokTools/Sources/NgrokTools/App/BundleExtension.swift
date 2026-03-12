@@ -6,13 +6,17 @@ extension Bundle {
     /// Custom resource bundle resolver that checks multiple paths
     /// to support both development builds and Homebrew app bundle installs.
     static let appModule: Bundle = {
+        let bundleName = "NgrokTools_NgrokTools.bundle"
+
         let candidates = [
-            // Standard app bundle: .app/Contents/Resources/
-            Bundle.main.resourceURL?.appendingPathComponent("NgrokTools_NgrokTools.bundle"),
-            // SPM default: .app/NgrokTools_NgrokTools.bundle
-            Bundle.main.bundleURL.appendingPathComponent("NgrokTools_NgrokTools.bundle"),
-            // Alongside executable
-            Bundle(for: BundleToken.self).resourceURL?.appendingPathComponent("NgrokTools_NgrokTools.bundle"),
+            // App bundle: .app/Contents/Resources/
+            Bundle.main.resourceURL?.appendingPathComponent(bundleName),
+            // SPM default: .app/ root (Bundle.main.bundleURL)
+            Bundle.main.bundleURL.appendingPathComponent(bundleName),
+            // Alongside the executable
+            Bundle(for: BundleToken.self).bundleURL.appendingPathComponent(bundleName),
+            // Executable directory parent (for CLI usage)
+            Bundle.main.executableURL?.deletingLastPathComponent().appendingPathComponent(bundleName),
         ]
 
         for candidate in candidates {
@@ -21,7 +25,6 @@ extension Bundle {
             }
         }
 
-        // Fallback to SPM-generated Bundle.module
-        return Bundle.module
+        fatalError("could not load resource bundle: searched \(candidates.compactMap { $0?.path })")
     }()
 }
