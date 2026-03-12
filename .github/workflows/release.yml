@@ -25,11 +25,9 @@ jobs:
           mkdir -p NgrokToolbar.app/Contents/Resources
           cp NgrokTools/.build/release/NgrokTools NgrokToolbar.app/Contents/MacOS/
           cp NgrokTools/Info.plist NgrokToolbar.app/Contents/
-          # Copy resource bundle (icons, etc.)
           if [ -d NgrokTools/.build/release/NgrokTools_NgrokTools.bundle ]; then
             cp -R NgrokTools/.build/release/NgrokTools_NgrokTools.bundle NgrokToolbar.app/Contents/Resources/
           fi
-          # Copy app icon
           if [ -f NgrokTools/AppIcon.icns ]; then
             cp NgrokTools/AppIcon.icns NgrokToolbar.app/Contents/Resources/
           fi
@@ -44,3 +42,29 @@ jobs:
         with:
           files: ngrok-toolbar-${{ github.ref_name }}-arm64.tar.gz
           generate_release_notes: true
+
+      - name: Update Homebrew formula
+        if: ${{ secrets.HOMEBREW_TAP_TOKEN != '' }}
+        env:
+          TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          # Download source tarball and compute sha256
+          TARBALL_URL="https://github.com/dan1901/ngrok-toolbar/archive/refs/tags/${TAG}.tar.gz"
+          SHA256=$(curl -sL "$TARBALL_URL" | shasum -a 256 | awk '{print $1}')
+          echo "SHA256: $SHA256"
+
+          # Clone homebrew-tap
+          git clone "https://x-access-token:${TAP_TOKEN}@github.com/dan1901/homebrew-tap.git" /tmp/homebrew-tap
+
+          # Update formula: replace url and sha256 lines
+          cd /tmp/homebrew-tap
+          sed -i '' "s|url \"https://github.com/dan1901/ngrok-toolbar/archive/refs/tags/.*\"|url \"https://github.com/dan1901/ngrok-toolbar/archive/refs/tags/${TAG}.tar.gz\"|" Formula/ngrok-toolbar.rb
+          sed -i '' "s|sha256 \".*\"|sha256 \"${SHA256}\"|" Formula/ngrok-toolbar.rb
+
+          # Commit and push
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add Formula/ngrok-toolbar.rb
+          git commit -m "Update ngrok-toolbar to ${TAG}"
+          git push
