@@ -11,32 +11,7 @@ class NgrokToolbar < Formula
 
   def install
     cd "NgrokTools" do
-      system "swift", "build", "-c", "release", "--disable-sandbox"
-
-      # Copy build outputs - use arch-specific path (symlink .build/release may not work in sandbox)
-      arch = Hardware::CPU.arm? ? "arm64" : "x86_64"
-      system "cp", ".build/#{arch}-apple-macosx/release/NgrokTools", "NgrokTools-bin"
-      system "cp", "-R", ".build/#{arch}-apple-macosx/release/NgrokTools_NgrokTools.bundle", "NgrokTools_NgrokTools.bundle"
-
-      bin.install "NgrokTools-bin" => "ngrok-toolbar"
-
-      # Create app bundle
-      app_dir = prefix/"NgrokToolbar.app"
-      app_contents = app_dir/"Contents"
-      (app_contents/"MacOS").mkpath
-      (app_contents/"Resources").mkpath
-
-      cp "NgrokTools-bin", app_contents/"MacOS/NgrokTools"
-      cp "Info.plist", app_contents/"Info.plist"
-
-      if File.exist?("AppIcon.icns")
-        cp "AppIcon.icns", app_contents/"Resources/AppIcon.icns"
-      end
-
-      # Resource bundle at .app/ root (where SPM's Bundle.module looks)
-      if File.directory?("NgrokTools_NgrokTools.bundle")
-        cp_r "NgrokTools_NgrokTools.bundle", app_dir/"NgrokTools_NgrokTools.bundle"
-      end
+      system "make", "install", "PREFIX=#{prefix}"
     end
   end
 
