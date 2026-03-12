@@ -32,7 +32,7 @@ jobs:
           if [ -f NgrokTools/AppIcon.icns ]; then
             cp NgrokTools/AppIcon.icns NgrokToolbar.app/Contents/Resources/
           fi
-          codesign -s - -f NgrokToolbar.app
+          codesign -s - -f --deep NgrokToolbar.app
 
       - name: Create tarball
         run: |

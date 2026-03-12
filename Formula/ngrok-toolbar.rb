@@ -39,7 +39,7 @@ class NgrokToolbar < Formula
       cp_r resource_bundle, prefix/"NgrokToolbar.app/"
     end
 
-    system "codesign", "-s", "-", "-f", prefix/"NgrokToolbar.app"
+    system "codesign", "-s", "-", "-f", "--deep", prefix/"NgrokToolbar.app"
   end
 
   def caveats
