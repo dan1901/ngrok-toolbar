@@ -30,7 +30,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             if let iconURL = Bundle.module.url(forResource: "menubar-icon", withExtension: "png"),
                let image = NSImage(contentsOf: iconURL) {
                 image.size = NSSize(width: 18, height: 18)
-                image.isTemplate = true
+                image.isTemplate = false
                 button.image = image
             } else {
                 button.image = NSImage(systemSymbolName: "network", accessibilityDescription: "ngrok Tools")
