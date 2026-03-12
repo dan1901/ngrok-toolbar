@@ -1,8 +1,8 @@
 class NgrokToolbar < Formula
   desc "macOS menu bar app for managing ngrok tunnels, sessions, and endpoints"
   homepage "https://github.com/dan1901/ngrok-toolbar"
-  url "https://github.com/dan1901/ngrok-toolbar/archive/refs/tags/v1.0.1.tar.gz"
-  sha256 "b99745633cbc55b397b8607036abbb9b00c1d79b88da613732a56c21430a5b32"
+  url "https://github.com/dan1901/ngrok-toolbar/archive/refs/tags/v1.0.3.tar.gz"
+  sha256 "84002d6f5a3e5a4d33bb94e07196eafa45f1de8faf86a55d34c186cc646034c8"
   license "MIT"
   head "https://github.com/dan1901/ngrok-toolbar.git", branch: "main"
 
@@ -14,29 +14,25 @@ class NgrokToolbar < Formula
       system "swift", "build", "-c", "release", "--disable-sandbox"
       bin.install ".build/release/NgrokTools" => "ngrok-toolbar"
 
-      # Install resource bundle
+      # Create app bundle
+      app_dir = prefix/"NgrokToolbar.app"
+      app_contents = app_dir/"Contents"
+      (app_contents/"MacOS").mkpath
+      (app_contents/"Resources").mkpath
+
+      cp ".build/release/NgrokTools", app_contents/"MacOS/NgrokTools"
+      cp "Info.plist", app_contents/"Info.plist"
+
+      # Copy app icon
+      if File.exist?("AppIcon.icns")
+        cp "AppIcon.icns", app_contents/"Resources/AppIcon.icns"
+      end
+
+      # Copy resource bundle to .app/ root (where SPM's Bundle.module looks)
       resource_bundle = ".build/release/NgrokTools_NgrokTools.bundle"
       if File.directory?(resource_bundle)
-        (lib/"NgrokTools_NgrokTools.bundle").install Dir["#{resource_bundle}/*"]
+        cp_r resource_bundle, app_dir/"NgrokTools_NgrokTools.bundle"
       end
-    end
-
-    # Create app bundle
-    app_bundle = prefix/"NgrokToolbar.app/Contents"
-    (app_bundle/"MacOS").mkpath
-    (app_bundle/"Resources").mkpath
-    cp bin/"ngrok-toolbar", app_bundle/"MacOS/NgrokTools"
-    cp "NgrokTools/Info.plist", app_bundle/"Info.plist"
-
-    # Copy icons
-    if File.exist?("NgrokTools/AppIcon.icns")
-      cp "NgrokTools/AppIcon.icns", app_bundle/"Resources/AppIcon.icns"
-    end
-
-    # Resource bundle at .app/ root (where SPM's Bundle.module looks)
-    resource_bundle = "NgrokTools/.build/release/NgrokTools_NgrokTools.bundle"
-    if File.directory?(resource_bundle)
-      cp_r resource_bundle, prefix/"NgrokToolbar.app/"
     end
   end
 
