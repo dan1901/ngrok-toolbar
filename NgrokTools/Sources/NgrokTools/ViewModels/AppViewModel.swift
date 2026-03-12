@@ -46,8 +46,9 @@ final class AppViewModel: ObservableObject {
     func startPolling() {
         pollingManager.updateInterval(pollingInterval)
         pollingManager.start { [weak self] in
+            guard let vm = self else { return }
             Task { @MainActor in
-                await self?.refreshAndDetectChanges()
+                await vm.refreshAndDetectChanges()
             }
         }
         Task { await refreshAndDetectChanges() }
