@@ -155,8 +155,8 @@ struct TunnelDetailView: View {
                             }
                             .padding(.bottom, 8)
                         }
-                        .onChange(of: requests.first?.id) { _ in
-                            // Scroll to newest (top) when new request arrives
+                        .onChange(of: requests.first?.id) { oldVal, newVal in
+                            guard oldVal != newVal else { return }
                             if let firstId = sortedRequests.first?.id {
                                 withAnimation(.easeOut(duration: 0.2)) {
                                     proxy.scrollTo(firstId, anchor: .top)

@@ -7,30 +7,17 @@ on:
     branches: [main]
 
 jobs:
-  build:
+  build-and-test:
     runs-on: macos-14
     steps:
       - uses: actions/checkout@v4
-
-      - name: Select Xcode
-        run: sudo xcode-select -s /Applications/Xcode_15.4.app
 
       - name: Build
         run: |
           cd NgrokTools
-          swift build
+          swift build 2>&1
 
       - name: Test
         run: |
           cd NgrokTools
-          swift test
-
-  lint:
-    runs-on: macos-14
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Check formatting
-        run: |
-          cd NgrokTools
-          swift build 2>&1 | grep -c "error:" && exit 1 || true
+          swift test 2>&1

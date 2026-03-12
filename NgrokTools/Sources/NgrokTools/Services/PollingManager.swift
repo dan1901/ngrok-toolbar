@@ -6,7 +6,7 @@ final class PollingManager: ObservableObject {
     @Published private(set) var isRunning = false
 
     private var timer: Timer?
-    private var action: (() -> Void)?
+    private var action: (@Sendable () -> Void)?
 
     private let minInterval: TimeInterval = 10.0
     private let maxInterval: TimeInterval = 60.0
@@ -25,12 +25,13 @@ final class PollingManager: ObservableObject {
         }
     }
 
-    func start(action: @escaping () -> Void) {
+    func start(action: @escaping @Sendable () -> Void) {
         self.action = action
         isRunning = true
-        let t = Timer(timeInterval: interval, repeats: true) { [weak self] _ in
+        let savedAction = action
+        let t = Timer(timeInterval: interval, repeats: true) { _ in
             Task { @MainActor in
-                self?.action?()
+                savedAction()
             }
         }
         RunLoop.main.add(t, forMode: .common)
