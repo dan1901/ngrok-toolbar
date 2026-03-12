@@ -12,7 +12,11 @@ class NgrokToolbar < Formula
   def install
     cd "NgrokTools" do
       system "swift", "build", "-c", "release", "--disable-sandbox"
-      bin.install ".build/release/NgrokTools" => "ngrok-toolbar"
+
+      # Get actual bin path (may differ per architecture)
+      bin_path = Utils.safe_popen_read("swift", "build", "-c", "release", "--show-bin-path").strip
+
+      bin.install "#{bin_path}/NgrokTools" => "ngrok-toolbar"
 
       # Create app bundle
       app_dir = prefix/"NgrokToolbar.app"
@@ -20,16 +24,15 @@ class NgrokToolbar < Formula
       (app_contents/"MacOS").mkpath
       (app_contents/"Resources").mkpath
 
-      cp ".build/release/NgrokTools", app_contents/"MacOS/NgrokTools"
+      cp "#{bin_path}/NgrokTools", app_contents/"MacOS/NgrokTools"
       cp "Info.plist", app_contents/"Info.plist"
 
-      # Copy app icon
       if File.exist?("AppIcon.icns")
         cp "AppIcon.icns", app_contents/"Resources/AppIcon.icns"
       end
 
       # Copy resource bundle to .app/ root (where SPM's Bundle.module looks)
-      resource_bundle = ".build/release/NgrokTools_NgrokTools.bundle"
+      resource_bundle = "#{bin_path}/NgrokTools_NgrokTools.bundle"
       if File.directory?(resource_bundle)
         cp_r resource_bundle, app_dir/"NgrokTools_NgrokTools.bundle"
       end
