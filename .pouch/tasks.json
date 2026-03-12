@@ -10,7 +10,9 @@
       "dependencies": [],
       "acceptanceCriteria": ["AC-3"],
       "testRequired": false,
-      "skills": ["swift", "swiftui", "appkit", "xcode"]
+      "skills": ["swift", "swiftui", "appkit", "xcode"],
+      "status": "completed",
+      "commitHash": "416613f"
     },
     {
       "id": "TASK-002",
