@@ -1,6 +1,7 @@
 import XCTest
 @testable import NgrokTools
 
+@MainActor
 final class AppDelegateTests: XCTestCase {
     func testUpdateBadgeWithPositiveCount() {
         let delegate = AppDelegate()
