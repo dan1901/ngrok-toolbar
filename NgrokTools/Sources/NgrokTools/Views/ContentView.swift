@@ -1,15 +1,24 @@
 import SwiftUI
 
 struct ContentView: View {
+    @StateObject private var viewModel = DashboardViewModel()
+    @State private var showSettings = false
+
     var body: some View {
         VStack(spacing: 0) {
             headerView
             Divider()
-            Text("Loading...")
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .foregroundStyle(.secondary)
+            DashboardView(viewModel: viewModel)
         }
         .frame(width: 380, height: 480)
+        .onAppear {
+            let keychain = KeychainService()
+            if let token = keychain.read() ?? ConfigParser.detectAuthtoken() {
+                let client = NgrokAPIClient(token: token)
+                viewModel.configure(with: client)
+                Task { await viewModel.refresh() }
+            }
+        }
     }
 
     private var headerView: some View {
@@ -19,7 +28,11 @@ struct ContentView: View {
             Text("ngrok Tools")
                 .font(.headline)
             Spacer()
-            Button(action: {}) {
+            if viewModel.isLoading {
+                ProgressView()
+                    .controlSize(.small)
+            }
+            Button(action: { showSettings.toggle() }) {
                 Image(systemName: "gearshape")
             }
             .buttonStyle(.plain)
