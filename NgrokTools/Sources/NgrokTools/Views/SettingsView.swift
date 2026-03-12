@@ -6,6 +6,7 @@ struct SettingsView: View {
     @State private var tokenInput: String = ""
     @State private var currentToken: String = ""
     @State private var showTokenSaved = false
+    @StateObject private var updateChecker = UpdateChecker()
     @Environment(\.dismiss) private var dismiss
 
     private let keychain = KeychainService()
@@ -27,7 +28,7 @@ struct SettingsView: View {
             Spacer()
         }
         .padding(20)
-        .frame(width: 380, height: 420)
+        .frame(width: 380, height: 520)
         .onAppear {
             if let token = keychain.read() {
                 currentToken = String(token.prefix(8)) + "..."
@@ -110,13 +111,86 @@ struct SettingsView: View {
     }
 
     private var aboutSection: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text("ngrok Tools v1.0.0")
+        VStack(alignment: .leading, spacing: 8) {
+            Label("About", systemImage: "info.circle")
+                .font(.headline)
+
+            HStack {
+                Text("Version")
+                    .foregroundStyle(.secondary)
+                Spacer()
+                Text("v\(UpdateChecker.currentVersion)")
+                    .font(.system(.body, design: .monospaced))
+            }
+
+            HStack {
+                if updateChecker.isChecking {
+                    ProgressView()
+                        .controlSize(.small)
+                    Text("확인 중...")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                } else if updateChecker.hasUpdate, let latest = updateChecker.latestVersion {
+                    Image(systemName: "arrow.up.circle.fill")
+                        .foregroundStyle(.green)
+                    Text("v\(latest) 업데이트 가능")
+                        .font(.caption)
+                        .foregroundStyle(.green)
+                    Spacer()
+                    Button("다운로드") {
+                        if let urlString = updateChecker.releaseURL,
+                           let url = URL(string: urlString) {
+                            NSWorkspace.shared.open(url)
+                        }
+                    }
+                    .controlSize(.small)
+                } else if let error = updateChecker.errorMessage {
+                    Image(systemName: "exclamationmark.triangle")
+                        .foregroundStyle(.orange)
+                    Text(error)
+                        .font(.caption)
+                        .foregroundStyle(.orange)
+                    Spacer()
+                } else if updateChecker.latestVersion != nil {
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundStyle(.green)
+                    Text("최신 버전입니다")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    Spacer()
+                }
+
+                if !updateChecker.isChecking {
+                    Button("업데이트 확인") {
+                        Task { await updateChecker.checkForUpdates() }
+                    }
+                    .controlSize(.small)
+                }
+            }
+
+            if updateChecker.hasUpdate, let notes = updateChecker.releaseNotes, !notes.isEmpty {
+                Text(notes)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(3)
+                    .padding(8)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(Color.primary.opacity(0.06))
+                    .cornerRadius(6)
+            }
+
+            HStack(spacing: 12) {
+                Button("GitHub") {
+                    if let url = URL(string: "https://github.com/dan1901/ngrok-toolbar") {
+                        NSWorkspace.shared.open(url)
+                    }
+                }
                 .font(.caption)
-                .foregroundStyle(.secondary)
-            Text("macOS Menu Bar App for ngrok management")
-                .font(.caption)
-                .foregroundStyle(.secondary)
+
+                Text("MIT License")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
         }
     }
 }
