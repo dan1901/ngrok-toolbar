@@ -33,13 +33,13 @@ class NgrokToolbar < Formula
       cp "NgrokTools/AppIcon.icns", app_bundle/"Resources/AppIcon.icns"
     end
 
-    # Resource bundle must be at NgrokToolbar.app/ root (where Bundle.module looks)
+    # Resource bundle in Contents/Resources/ (Bundle.appModule resolves this path)
     resource_bundle = "NgrokTools/.build/release/NgrokTools_NgrokTools.bundle"
     if File.directory?(resource_bundle)
-      cp_r resource_bundle, prefix/"NgrokToolbar.app/"
+      cp_r resource_bundle, app_bundle/"Resources/"
     end
 
-    system "codesign", "-s", "-", "-f", "--deep", prefix/"NgrokToolbar.app"
+    system "codesign", "-s", "-", "-f", prefix/"NgrokToolbar.app"
   end
 
   def caveats

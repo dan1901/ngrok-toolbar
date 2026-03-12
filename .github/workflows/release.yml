@@ -27,12 +27,12 @@ jobs:
           cp NgrokTools/.build/release/NgrokTools NgrokToolbar.app/Contents/MacOS/
           cp NgrokTools/Info.plist NgrokToolbar.app/Contents/
           if [ -d NgrokTools/.build/release/NgrokTools_NgrokTools.bundle ]; then
-            cp -R NgrokTools/.build/release/NgrokTools_NgrokTools.bundle NgrokToolbar.app/
+            cp -R NgrokTools/.build/release/NgrokTools_NgrokTools.bundle NgrokToolbar.app/Contents/Resources/
           fi
           if [ -f NgrokTools/AppIcon.icns ]; then
             cp NgrokTools/AppIcon.icns NgrokToolbar.app/Contents/Resources/
           fi
-          codesign -s - -f --deep NgrokToolbar.app
+          codesign -s - -f NgrokToolbar.app
 
       - name: Create tarball
         run: |
