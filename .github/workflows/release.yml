@@ -11,6 +11,7 @@ permissions:
 jobs:
   build:
     runs-on: macos-14
+    environment: DEPLOY
     steps:
       - uses: actions/checkout@v4
 
