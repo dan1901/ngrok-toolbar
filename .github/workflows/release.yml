@@ -45,7 +45,6 @@ jobs:
           generate_release_notes: true
 
       - name: Update Homebrew formula
-        if: ${{ secrets.HOMEBREW_TAP_TOKEN != '' }}
         env:
           TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
           TAG: ${{ github.ref_name }}
