@@ -13,9 +13,9 @@ class NgrokToolbar < Formula
     cd "NgrokTools" do
       system "swift", "build", "-c", "release", "--disable-sandbox"
 
-      bin_path = Utils.safe_popen_read(
-        "swift", "build", "-c", "release", "--disable-sandbox", "--show-bin-path"
-      ).strip
+      # SPM outputs to .build/{arch}-apple-macosx/release/
+      arch = Hardware::CPU.arm? ? "arm64" : "x86_64"
+      bin_path = ".build/#{arch}-apple-macosx/release"
 
       bin.install "#{bin_path}/NgrokTools" => "ngrok-toolbar"
 
