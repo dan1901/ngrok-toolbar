@@ -28,11 +28,13 @@ final class PollingManager: ObservableObject {
     func start(action: @escaping () -> Void) {
         self.action = action
         isRunning = true
-        timer = Timer.scheduledTimer(withTimeInterval: interval, repeats: true) { [weak self] _ in
+        let t = Timer(timeInterval: interval, repeats: true) { [weak self] _ in
             Task { @MainActor in
                 self?.action?()
             }
         }
+        RunLoop.main.add(t, forMode: .common)
+        timer = t
     }
 
     func stop() {

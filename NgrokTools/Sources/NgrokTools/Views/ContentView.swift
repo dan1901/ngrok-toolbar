@@ -1,7 +1,8 @@
 import SwiftUI
 
 struct ContentView: View {
-    @StateObject private var appViewModel = AppViewModel()
+    @ObservedObject var appViewModel: AppViewModel
+    let isDetached: Bool
 
     var body: some View {
         VStack(spacing: 0) {
@@ -13,15 +14,20 @@ struct ContentView: View {
                 noTokenView
             }
         }
-        .frame(width: 380, height: 480)
-        .sheet(isPresented: $appViewModel.showSettings) {
+        .frame(
+            minWidth: isDetached ? 360 : 380,
+            idealWidth: isDetached ? 420 : 380,
+            minHeight: isDetached ? 400 : 480,
+            idealHeight: isDetached ? 560 : 480
+        )
+        .frame(width: isDetached ? nil : 380, height: isDetached ? nil : 480)
+        .sheet(isPresented: $appViewModel.showSettings, onDismiss: {
+            appViewModel.reloadTokenAndConnect()
+        }) {
             SettingsView()
         }
         .onAppear {
             appViewModel.initialize()
-        }
-        .onDisappear {
-            appViewModel.cleanup()
         }
     }
 
@@ -36,6 +42,17 @@ struct ContentView: View {
                 ProgressView()
                     .controlSize(.small)
             }
+
+            // Detach / Attach button
+            Button(action: {
+                NotificationCenter.default.post(name: .toggleDetach, object: nil)
+            }) {
+                Image(systemName: isDetached ? "menubar.arrow.down.rectangle" : "macwindow.on.rectangle")
+                    .font(.system(size: 13))
+            }
+            .buttonStyle(.plain)
+            .help(isDetached ? "Back to toolbar" : "Open in window")
+
             Button(action: { appViewModel.showSettings.toggle() }) {
                 Image(systemName: "gearshape")
             }
@@ -49,12 +66,24 @@ struct ContentView: View {
         VStack(spacing: 12) {
             Image(systemName: "key.slash")
                 .font(.largeTitle)
-                .foregroundStyle(.secondary)
-            Text("No API token configured")
-                .foregroundStyle(.secondary)
+                .foregroundStyle(.orange)
+            Text("API Key Required")
+                .font(.headline)
+            if let error = appViewModel.authError {
+                Text(error)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 20)
+            }
+            Text("authtoken != API Key")
+                .font(.caption2)
+                .foregroundStyle(.red)
             Button("Open Settings") {
                 appViewModel.showSettings = true
             }
+            .buttonStyle(.borderedProminent)
+            .controlSize(.small)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }

@@ -6,24 +6,27 @@ final class AppViewModel: ObservableObject {
     @Published var isAuthenticated = false
     @Published var activeTunnelCount = 0
     @Published var showSettings = false
+    @Published var authError: String?
 
     let dashboardViewModel = DashboardViewModel()
     let pollingManager = PollingManager()
 
     private let keychainService = KeychainService()
+    private var didInitialize = false
     @AppStorage("pollingInterval") private var pollingInterval: Double = 30.0
     @AppStorage("notificationsEnabled") private var notificationsEnabled: Bool = true
 
-    private var previousTunnelIDs: [String] = []
-
     func initialize() {
-        // Try to detect token from CLI config or keychain
-        if let token = keychainService.read() {
-            setupWithToken(token)
-        } else if let token = ConfigParser.detectAuthtoken() {
-            keychainService.save(token: token)
-            setupWithToken(token)
+        guard !didInitialize else { return }
+        didInitialize = true
+        // Priority: 1) Keychain saved API key, 2) ngrok config api_key field
+        if let apiKey = keychainService.read(), !apiKey.isEmpty {
+            setupWithToken(apiKey)
+        } else if let apiKey = ConfigParser.detectAPIKey() {
+            keychainService.save(token: apiKey)
+            setupWithToken(apiKey)
         } else {
+            authError = "ngrok API Key가 필요합니다.\nauthtoken이 아닌 API Key를 입력해주세요.\nhttps://dashboard.ngrok.com/api-keys"
             showSettings = true
         }
 
@@ -36,6 +39,7 @@ final class AppViewModel: ObservableObject {
         let client = NgrokAPIClient(token: token)
         dashboardViewModel.configure(with: client)
         isAuthenticated = true
+        authError = nil
         startPolling()
     }
 
@@ -46,7 +50,6 @@ final class AppViewModel: ObservableObject {
                 await self?.refreshAndDetectChanges()
             }
         }
-        // Initial fetch
         Task { await refreshAndDetectChanges() }
     }
 
@@ -58,6 +61,16 @@ final class AppViewModel: ObservableObject {
         let oldTunnelIDs = dashboardViewModel.tunnels.map(\.id)
 
         await dashboardViewModel.refresh()
+
+        // If we get an auth error, prompt for API key
+        if let error = dashboardViewModel.errorMessage,
+           error.contains("authtoken") || error.contains("ERR_NGROK_206") || error.contains("401") {
+            isAuthenticated = false
+            authError = "잘못된 토큰입니다. ngrok API Key를 입력해주세요.\nhttps://dashboard.ngrok.com/api-keys"
+            stopPolling()
+            showSettings = true
+            return
+        }
 
         let newTunnelIDs = dashboardViewModel.tunnels.map(\.id)
         activeTunnelCount = newTunnelIDs.count
@@ -76,9 +89,12 @@ final class AppViewModel: ObservableObject {
         for id in removed {
             NotificationService.shared.notifyTunnelDisconnected(url: id)
         }
+    }
 
-        if let error = dashboardViewModel.errorMessage {
-            NotificationService.shared.notifyError(message: error)
+    func reloadTokenAndConnect() {
+        stopPolling()
+        if let apiKey = keychainService.read(), !apiKey.isEmpty {
+            setupWithToken(apiKey)
         }
     }
 

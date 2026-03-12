@@ -79,7 +79,11 @@ struct EndpointCardView: View {
             }
         }
         .padding(10)
-        .background(Color(nsColor: .controlBackgroundColor))
+        .background(Color.primary.opacity(0.06))
+        .overlay(
+            RoundedRectangle(cornerRadius: 8)
+                .stroke(Color.primary.opacity(0.1), lineWidth: 0.5)
+        )
         .cornerRadius(8)
         .alert("Delete Endpoint?", isPresented: $showDeleteConfirm) {
             Button("Cancel", role: .cancel) {}

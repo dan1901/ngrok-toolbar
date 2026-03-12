@@ -79,7 +79,11 @@ struct SessionCardView: View {
             }
         }
         .padding(10)
-        .background(Color(nsColor: .controlBackgroundColor))
+        .background(Color.primary.opacity(0.06))
+        .overlay(
+            RoundedRectangle(cornerRadius: 8)
+                .stroke(Color.primary.opacity(0.1), lineWidth: 0.5)
+        )
         .cornerRadius(8)
         .alert("Stop Session?", isPresented: $showStopConfirm) {
             Button("Cancel", role: .cancel) {}

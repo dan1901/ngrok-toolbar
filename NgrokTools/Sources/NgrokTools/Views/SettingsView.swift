@@ -37,8 +37,19 @@ struct SettingsView: View {
 
     private var tokenSection: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Label("API Token", systemImage: "key")
+            Label("API Key", systemImage: "key")
                 .font(.headline)
+
+            Text("authtoken이 아닌 API Key가 필요합니다")
+                .font(.caption)
+                .foregroundStyle(.orange)
+
+            Button("API Key 발급 페이지 열기") {
+                if let url = URL(string: "https://dashboard.ngrok.com/api-keys") {
+                    NSWorkspace.shared.open(url)
+                }
+            }
+            .font(.caption)
 
             if !currentToken.isEmpty {
                 HStack {
@@ -55,7 +66,7 @@ struct SettingsView: View {
             }
 
             HStack {
-                SecureField("Enter API token", text: $tokenInput)
+                SecureField("Enter ngrok API Key", text: $tokenInput)
                     .textFieldStyle(.roundedBorder)
                 Button("Save") {
                     guard !tokenInput.isEmpty else { return }
@@ -68,7 +79,7 @@ struct SettingsView: View {
             }
 
             if showTokenSaved {
-                Text("Token saved to Keychain")
+                Text("API Key saved! Close settings and reopen the app.")
                     .font(.caption)
                     .foregroundStyle(.green)
             }

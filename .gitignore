@@ -1,0 +1,19 @@
+# Build
+.build/
+build/
+DerivedData/
+*.xcodeproj/xcuserdata/
+
+# Pouch (dev workflow)
+.pouch/
+
+# Claude
+.claude/
+
+# macOS
+.DS_Store
+*.swp
+*~
+
+# Homebrew
+*.bottle.tar.gz

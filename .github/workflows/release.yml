@@ -1,0 +1,40 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode_15.4.app
+
+      - name: Build release binary
+        run: |
+          cd NgrokTools
+          swift build -c release
+
+      - name: Create app bundle
+        run: |
+          mkdir -p NgrokToolbar.app/Contents/MacOS
+          cp NgrokTools/.build/release/NgrokTools NgrokToolbar.app/Contents/MacOS/
+          cp NgrokTools/Info.plist NgrokToolbar.app/Contents/
+          codesign -s - -f NgrokToolbar.app
+
+      - name: Create tarball
+        run: |
+          tar -czf ngrok-toolbar-${{ github.ref_name }}-arm64.tar.gz NgrokToolbar.app
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ngrok-toolbar-${{ github.ref_name }}-arm64.tar.gz
+          generate_release_notes: true

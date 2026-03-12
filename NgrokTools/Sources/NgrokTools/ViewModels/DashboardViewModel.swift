@@ -6,17 +6,20 @@ final class DashboardViewModel: ObservableObject {
     @Published var tunnels: [Tunnel] = []
     @Published var sessions: [TunnelSession] = []
     @Published var endpoints: [Endpoint] = []
+    @Published var domains: [ReservedDomain] = []
     @Published var isLoading = false
     @Published var errorMessage: String?
 
     private var tunnelService: TunnelService?
     private var sessionService: SessionService?
     private var endpointService: EndpointService?
+    private var domainService: DomainService?
 
     func configure(with client: NgrokAPIClient) {
         tunnelService = TunnelService(client: client)
         sessionService = SessionService(client: client)
         endpointService = EndpointService(client: client)
+        domainService = DomainService(client: client)
     }
 
     func refresh() async {
@@ -26,11 +29,13 @@ final class DashboardViewModel: ObservableObject {
         async let t = tunnelService?.listTunnels()
         async let s = sessionService?.listSessions()
         async let e = endpointService?.listEndpoints()
+        async let d = domainService?.listDomains()
 
         do {
             tunnels = try await t ?? []
             sessions = try await s ?? []
             endpoints = try await e ?? []
+            domains = try await d ?? []
         } catch {
             errorMessage = error.localizedDescription
         }
