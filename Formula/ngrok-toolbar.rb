@@ -13,9 +13,10 @@ class NgrokToolbar < Formula
     cd "NgrokTools" do
       system "swift", "build", "-c", "release", "--disable-sandbox"
 
-      # Copy build outputs out of .build/ (Homebrew sandbox blocks direct access)
-      system "cp", ".build/release/NgrokTools", "NgrokTools-bin"
-      system "cp", "-R", ".build/release/NgrokTools_NgrokTools.bundle", "NgrokTools_NgrokTools.bundle"
+      # Copy build outputs - use arch-specific path (symlink .build/release may not work in sandbox)
+      arch = Hardware::CPU.arm? ? "arm64" : "x86_64"
+      system "cp", ".build/#{arch}-apple-macosx/release/NgrokTools", "NgrokTools-bin"
+      system "cp", "-R", ".build/#{arch}-apple-macosx/release/NgrokTools_NgrokTools.bundle", "NgrokTools_NgrokTools.bundle"
 
       bin.install "NgrokTools-bin" => "ngrok-toolbar"
 
