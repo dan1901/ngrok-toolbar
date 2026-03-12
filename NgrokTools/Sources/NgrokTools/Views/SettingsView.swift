@@ -13,25 +13,29 @@ struct SettingsView: View {
     private let keychain = KeychainService()
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 20) {
+        VStack(alignment: .leading, spacing: 0) {
             Text("Settings")
                 .font(.title2)
                 .fontWeight(.bold)
+                .padding(.bottom, 16)
 
-            tokenSection
-            Divider()
-            pollingSection
-            Divider()
-            notificationSection
-            Divider()
-            generalSection
-            Divider()
-            aboutSection
-
-            Spacer()
+            ScrollView {
+                VStack(alignment: .leading, spacing: 20) {
+                    tokenSection
+                    Divider()
+                    pollingSection
+                    Divider()
+                    notificationSection
+                    Divider()
+                    generalSection
+                    Divider()
+                    aboutSection
+                }
+                .padding(.bottom, 20)
+            }
         }
         .padding(20)
-        .frame(width: 380, height: 560)
+        .frame(width: 380, height: 520)
         .onAppear {
             if let token = keychain.read() {
                 currentToken = String(token.prefix(8)) + "..."
