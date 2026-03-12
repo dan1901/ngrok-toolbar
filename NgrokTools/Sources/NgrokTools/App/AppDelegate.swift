@@ -27,7 +27,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
 
         if let button = statusItem?.button {
-            button.image = NSImage(systemSymbolName: "network", accessibilityDescription: "ngrok Tools")
+            if let iconURL = Bundle.module.url(forResource: "menubar-icon", withExtension: "png"),
+               let image = NSImage(contentsOf: iconURL) {
+                image.size = NSSize(width: 18, height: 18)
+                image.isTemplate = true
+                button.image = image
+            } else {
+                button.image = NSImage(systemSymbolName: "network", accessibilityDescription: "ngrok Tools")
+            }
             button.action = #selector(togglePopover)
             button.target = self
         }

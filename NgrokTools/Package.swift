@@ -10,7 +10,12 @@ let package = Package(
     targets: [
         .executableTarget(
             name: "NgrokTools",
-            path: "Sources/NgrokTools"
+            path: "Sources/NgrokTools",
+            resources: [
+                .copy("Resources/menubar-icon.png"),
+                .copy("Resources/menubar-icon@2x.png"),
+                .copy("Resources/AppIcon.appiconset"),
+            ]
         ),
         .testTarget(
             name: "NgrokToolsTests",
