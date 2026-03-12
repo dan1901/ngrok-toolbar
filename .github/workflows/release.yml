@@ -14,9 +14,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Select Xcode
-        run: sudo xcode-select -s /Applications/Xcode_15.4.app
-
       - name: Build release binary
         run: |
           cd NgrokTools
@@ -25,8 +22,17 @@ jobs:
       - name: Create app bundle
         run: |
           mkdir -p NgrokToolbar.app/Contents/MacOS
+          mkdir -p NgrokToolbar.app/Contents/Resources
           cp NgrokTools/.build/release/NgrokTools NgrokToolbar.app/Contents/MacOS/
           cp NgrokTools/Info.plist NgrokToolbar.app/Contents/
+          # Copy resource bundle (icons, etc.)
+          if [ -d NgrokTools/.build/release/NgrokTools_NgrokTools.bundle ]; then
+            cp -R NgrokTools/.build/release/NgrokTools_NgrokTools.bundle NgrokToolbar.app/Contents/Resources/
+          fi
+          # Copy app icon
+          if [ -f NgrokTools/AppIcon.icns ]; then
+            cp NgrokTools/AppIcon.icns NgrokToolbar.app/Contents/Resources/
+          fi
           codesign -s - -f NgrokToolbar.app
 
       - name: Create tarball
