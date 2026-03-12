@@ -1,23 +1,27 @@
 import SwiftUI
 
 struct ContentView: View {
-    @StateObject private var viewModel = DashboardViewModel()
-    @State private var showSettings = false
+    @StateObject private var appViewModel = AppViewModel()
 
     var body: some View {
         VStack(spacing: 0) {
             headerView
             Divider()
-            DashboardView(viewModel: viewModel)
+            if appViewModel.isAuthenticated {
+                DashboardView(viewModel: appViewModel.dashboardViewModel)
+            } else {
+                noTokenView
+            }
         }
         .frame(width: 380, height: 480)
+        .sheet(isPresented: $appViewModel.showSettings) {
+            SettingsView()
+        }
         .onAppear {
-            let keychain = KeychainService()
-            if let token = keychain.read() ?? ConfigParser.detectAuthtoken() {
-                let client = NgrokAPIClient(token: token)
-                viewModel.configure(with: client)
-                Task { await viewModel.refresh() }
-            }
+            appViewModel.initialize()
+        }
+        .onDisappear {
+            appViewModel.cleanup()
         }
     }
 
@@ -28,16 +32,30 @@ struct ContentView: View {
             Text("ngrok Tools")
                 .font(.headline)
             Spacer()
-            if viewModel.isLoading {
+            if appViewModel.dashboardViewModel.isLoading {
                 ProgressView()
                     .controlSize(.small)
             }
-            Button(action: { showSettings.toggle() }) {
+            Button(action: { appViewModel.showSettings.toggle() }) {
                 Image(systemName: "gearshape")
             }
             .buttonStyle(.plain)
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
+    }
+
+    private var noTokenView: some View {
+        VStack(spacing: 12) {
+            Image(systemName: "key.slash")
+                .font(.largeTitle)
+                .foregroundStyle(.secondary)
+            Text("No API token configured")
+                .foregroundStyle(.secondary)
+            Button("Open Settings") {
+                appViewModel.showSettings = true
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
